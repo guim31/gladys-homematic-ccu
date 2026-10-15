@@ -1,177 +1,492 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Homematic CCU",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Homematic and Homematic IP devices of your CCU3, RaspberryMatic or piVCCU, in local.",
+    "fr": "Appareils Homematic et Homematic IP de votre CCU3, RaspberryMatic ou piVCCU, en local.",
+    "de": "Homematic- und Homematic-IP-Geräte deiner CCU3, RaspberryMatic oder piVCCU, lokal.",
+    "es": "Dispositivos Homematic y Homematic IP de su CCU3, RaspberryMatic o piVCCU, en local."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-homematic-ccu:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-homematic-ccu/main/cover.png",
+  "categories": ["protocols"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Your CCU",
+        "fr": "Votre CCU",
+        "de": "Deine CCU",
+        "es": "Su CCU"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "CCU3, RaspberryMatic or piVCCU. The integration reads the CCU through its web interface, with an administrator user: with authentication off in the CCU, keep Admin and leave the password empty.",
+        "fr": "CCU3, RaspberryMatic ou piVCCU. L'intégration lit la CCU par son interface web, avec un utilisateur administrateur : si l'authentification est désactivée sur la CCU, gardez Admin et laissez le mot de passe vide.",
+        "de": "CCU3, RaspberryMatic oder piVCCU. Die Integration liest die CCU über ihre Weboberfläche, mit einem Administrator: Ist die Authentifizierung auf der CCU aus, behalte Admin und lass das Passwort leer.",
+        "es": "CCU3, RaspberryMatic o piVCCU. La integración lee la CCU a través de su interfaz web, con un usuario administrador: si la autenticación está desactivada en la CCU, deje Admin y la contraseña vacía."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://github.com/guim31/gladys-homematic-ccu#readme",
+          "label": {
+            "en": "Integration documentation",
+            "fr": "Documentation de l'intégration",
+            "de": "Dokumentation der Integration",
+            "es": "Documentación de la integración"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "host",
+      "type": "string",
+      "label": {
+        "en": "CCU address",
+        "fr": "Adresse de la CCU",
+        "de": "Adresse der CCU",
+        "es": "Dirección de la CCU"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
+      "description": {
+        "en": "IP address or name of the CCU, with https:// if its web interface forwards to HTTPS.",
+        "fr": "Adresse IP ou nom de la CCU, avec https:// si son interface web redirige vers le HTTPS.",
+        "de": "IP-Adresse oder Name der CCU, mit https://, wenn ihre Weboberfläche auf HTTPS umleitet.",
+        "es": "Dirección IP o nombre de la CCU, con https:// si su interfaz web redirige a HTTPS."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.50",
+        "fr": "ex. 192.168.1.50",
+        "de": "z. B. 192.168.1.50",
+        "es": "p. ej. 192.168.1.50"
+      },
       "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "default": ""
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+      "key": "username",
+      "type": "string",
+      "label": {
+        "en": "User",
+        "fr": "Utilisateur",
+        "de": "Benutzer",
+        "es": "Usuario"
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "description": {
+        "en": "A CCU user with administrator rights (reading the devices needs them).",
+        "fr": "Un utilisateur de la CCU avec les droits d'administrateur (la lecture des appareils les exige).",
+        "de": "Ein CCU-Benutzer mit Administratorrechten (das Lesen der Geräte braucht sie).",
+        "es": "Un usuario de la CCU con derechos de administrador (la lectura de los dispositivos los requiere)."
+      },
       "required": false,
-      "default": "celsius",
+      "default": "Admin"
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Password",
+        "fr": "Mot de passe",
+        "de": "Passwort",
+        "es": "Contraseña"
+      },
+      "description": {
+        "en": "Empty if the user has none.",
+        "fr": "Vide si l'utilisateur n'en a pas.",
+        "de": "Leer, wenn der Benutzer keines hat.",
+        "es": "Vacía si el usuario no tiene."
+      },
+      "required": false
+    },
+    {
+      "key": "allow_self_signed",
+      "type": "boolean",
+      "label": {
+        "en": "Accept a self-signed certificate",
+        "fr": "Accepter un certificat auto-signé",
+        "de": "Selbstsigniertes Zertifikat akzeptieren",
+        "es": "Aceptar un certificado autofirmado"
+      },
+      "description": {
+        "en": "In HTTPS, the CCU uses its own certificate, which no authority signed.",
+        "fr": "En HTTPS, la CCU utilise son propre certificat, qu'aucune autorité n'a signé.",
+        "de": "Bei HTTPS nutzt die CCU ihr eigenes Zertifikat, das keine Stelle signiert hat.",
+        "es": "En HTTPS, la CCU usa su propio certificado, que ninguna autoridad ha firmado."
+      },
+      "required": false,
+      "default": true
+    },
+    {
+      "key": "interfaces",
+      "type": "multi_select",
+      "label": {
+        "en": "Interfaces read",
+        "fr": "Interfaces lues",
+        "de": "Gelesene Schnittstellen",
+        "es": "Interfaces leídas"
+      },
+      "description": {
+        "en": "The device families of the CCU to bring into Gladys.",
+        "fr": "Les familles d'appareils de la CCU à faire entrer dans Gladys.",
+        "de": "Die Gerätefamilien der CCU, die in Gladys erscheinen sollen.",
+        "es": "Las familias de dispositivos de la CCU que se incorporan a Gladys."
+      },
+      "required": false,
+      "default": ["HmIP-RF", "BidCos-RF", "BidCos-Wired", "VirtualDevices"],
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "HmIP-RF",
+          "label": {
+            "en": "Homematic IP (radio)",
+            "fr": "Homematic IP (radio)",
+            "de": "Homematic IP (Funk)",
+            "es": "Homematic IP (radio)"
+          }
+        },
+        {
+          "value": "BidCos-RF",
+          "label": {
+            "en": "Homematic (radio)",
+            "fr": "Homematic (radio)",
+            "de": "Homematic (Funk)",
+            "es": "Homematic (radio)"
+          }
+        },
+        {
+          "value": "BidCos-Wired",
+          "label": {
+            "en": "Homematic Wired",
+            "fr": "Homematic filaire",
+            "de": "Homematic Wired",
+            "es": "Homematic por cable"
+          }
+        },
+        {
+          "value": "VirtualDevices",
+          "label": {
+            "en": "Heating groups (Homematic IP)",
+            "fr": "Groupes de chauffage (Homematic IP)",
+            "de": "Heizungsgruppen (Homematic IP)",
+            "es": "Grupos de calefacción (Homematic IP)"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "sysvars",
+      "type": "select",
+      "label": {
+        "en": "System variables",
+        "fr": "Variables système",
+        "de": "Systemvariablen",
+        "es": "Variables del sistema"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Shown, read-only, on the Homematic CCU device.",
+        "fr": "Affichées, en lecture seule, sur l'appareil Homematic CCU.",
+        "de": "Angezeigt, nur lesbar, am Gerät Homematic CCU.",
+        "es": "Mostradas, solo lectura, en el dispositivo Homematic CCU."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "visible",
+      "options": [
+        {
+          "value": "visible",
+          "label": {
+            "en": "The visible ones",
+            "fr": "Les visibles",
+            "de": "Die sichtbaren",
+            "es": "Las visibles"
+          }
+        },
+        {
+          "value": "none",
+          "label": {
+            "en": "None",
+            "fr": "Aucune",
+            "de": "Keine",
+            "es": "Ninguna"
+          }
+        }
+      ]
+    },
+    {
+      "key": "poll_interval",
+      "type": "select",
+      "label": {
+        "en": "Reading interval",
+        "fr": "Intervalle de lecture",
+        "de": "Abfrageintervall",
+        "es": "Intervalo de lectura"
+      },
+      "description": {
+        "en": "How often the CCU is read: one short script per reading, no radio traffic.",
+        "fr": "Fréquence de lecture de la CCU : un court script par lecture, sans trafic radio.",
+        "de": "Wie oft die CCU gelesen wird: ein kurzes Skript pro Abfrage, ohne Funkverkehr.",
+        "es": "Frecuencia de lectura de la CCU: un breve script por lectura, sin tráfico de radio."
+      },
+      "required": false,
+      "default": "30",
+      "options": [
+        { "value": "10", "label": { "en": "10 s", "fr": "10 s", "de": "10 s", "es": "10 s" } },
+        { "value": "15", "label": { "en": "15 s", "fr": "15 s", "de": "15 s", "es": "15 s" } },
+        { "value": "30", "label": { "en": "30 s", "fr": "30 s", "de": "30 s", "es": "30 s" } },
+        {
+          "value": "60",
+          "label": { "en": "1 min", "fr": "1 min", "de": "1 min", "es": "1 min" }
+        },
+        {
+          "value": "120",
+          "label": { "en": "2 min", "fr": "2 min", "de": "2 min", "es": "2 min" }
+        },
+        {
+          "value": "300",
+          "label": { "en": "5 min", "fr": "5 min", "de": "5 min", "es": "5 min" }
+        }
+      ]
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the names",
+        "fr": "Langue des noms",
+        "de": "Sprache der Namen",
+        "es": "Idioma de los nombres"
+      },
+      "description": {
+        "en": "Language of the feature names given when a device is added to Gladys.",
+        "fr": "Langue des noms de fonctionnalités donnés à l'ajout d'un appareil dans Gladys.",
+        "de": "Sprache der Funktionsnamen, die beim Hinzufügen eines Geräts zu Gladys vergeben werden.",
+        "es": "Idioma de los nombres de funciones asignados al añadir un dispositivo a Gladys."
+      },
+      "required": false,
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": { "en": "English", "fr": "English", "de": "English", "es": "English" }
+        },
+        {
+          "value": "fr",
+          "label": { "en": "Français", "fr": "Français", "de": "Français", "es": "Français" }
+        },
+        {
+          "value": "de",
+          "label": { "en": "Deutsch", "fr": "Deutsch", "de": "Deutsch", "es": "Deutsch" }
+        },
+        {
+          "value": "es",
+          "label": { "en": "Español", "fr": "Español", "de": "Español", "es": "Español" }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 60
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "button_pressed",
+      "label": {
+        "en": "Homematic button pressed",
+        "fr": "Bouton Homematic appuyé",
+        "de": "Homematic-Taste gedrückt",
+        "es": "Botón Homematic pulsado"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "A key of a remote, a wall switch or an input was pressed. Seen at the next reading of the CCU.",
+        "fr": "Une touche de télécommande, d'interrupteur mural ou une entrée a été actionnée. Vue à la lecture suivante de la CCU.",
+        "de": "Eine Taste einer Fernbedienung, eines Wandtasters oder ein Eingang wurde betätigt. Erkannt bei der nächsten Abfrage der CCU.",
+        "es": "Se ha pulsado una tecla de un mando, de un pulsador de pared o una entrada. Detectado en la siguiente lectura de la CCU."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "label": {
+            "en": "Device",
+            "fr": "Appareil",
+            "de": "Gerät",
+            "es": "Dispositivo"
+          }
         },
         {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "key": "button",
+          "type": "number",
+          "label": {
+            "en": "Button number",
+            "fr": "Numéro de la touche",
+            "de": "Nummer der Taste",
+            "es": "Número de la tecla"
+          },
+          "description": {
+            "en": "The channel of the key in the CCU (1 for the first key).",
+            "fr": "Le canal de la touche dans la CCU (1 pour la première touche).",
+            "de": "Der Kanal der Taste in der CCU (1 für die erste Taste).",
+            "es": "El canal de la tecla en la CCU (1 para la primera tecla)."
+          },
+          "min": 1,
+          "max": 50
+        },
+        {
+          "key": "press",
+          "type": "select",
+          "label": {
+            "en": "Press",
+            "fr": "Appui",
+            "de": "Tastendruck",
+            "es": "Pulsación"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "short",
+              "label": { "en": "Short", "fr": "Court", "de": "Kurz", "es": "Corta" }
+            },
+            {
+              "value": "long",
+              "label": { "en": "Long", "fr": "Long", "de": "Lang", "es": "Larga" }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "device_name",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Device name",
+            "fr": "Nom de l'appareil",
+            "de": "Name des Geräts",
+            "es": "Nombre del dispositivo"
+          }
+        },
+        {
+          "key": "button",
+          "type": "number",
+          "label": {
+            "en": "Button number",
+            "fr": "Numéro de la touche",
+            "de": "Nummer der Taste",
+            "es": "Número de la tecla"
+          }
+        },
+        {
+          "key": "press",
+          "type": "string",
+          "label": {
+            "en": "Press (short or long)",
+            "fr": "Appui (court ou long)",
+            "de": "Tastendruck (kurz oder lang)",
+            "es": "Pulsación (corta o larga)"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "run_program",
+      "label": {
+        "en": "Run a CCU program",
+        "fr": "Lancer un programme de la CCU",
+        "de": "CCU-Programm starten",
+        "es": "Ejecutar un programa de la CCU"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Starts a program of the CCU, by its name.",
+        "fr": "Lance un programme de la CCU, par son nom.",
+        "de": "Startet ein Programm der CCU anhand seines Namens.",
+        "es": "Inicia un programa de la CCU por su nombre."
+      },
+      "timeout_seconds": 30,
       "fields": [
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
+          "key": "program",
+          "type": "string",
+          "label": {
+            "en": "Program name",
+            "fr": "Nom du programme",
+            "de": "Name des Programms",
+            "es": "Nombre del programa"
+          },
+          "description": {
+            "en": "As written in the CCU (Programs and connections).",
+            "fr": "Tel qu'écrit dans la CCU (Programmes et connexions).",
+            "de": "Wie in der CCU geschrieben (Programme und Verknüpfungen).",
+            "es": "Tal y como aparece en la CCU (Programas y conexiones)."
+          },
           "required": true
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "key": "program",
+          "type": "string",
+          "label": {
+            "en": "Program started",
+            "fr": "Programme lancé",
+            "de": "Gestartetes Programm",
+            "es": "Programa iniciado"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
+      "key": "ccu_status",
+      "label": {
+        "en": "Homematic CCU",
+        "fr": "Homematic CCU",
+        "de": "Homematic CCU",
+        "es": "Homematic CCU"
+      },
       "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+        "en": "Service and alarm messages, devices out of reach, low batteries, program buttons.",
+        "fr": "Messages de service et d'alarme, appareils injoignables, piles faibles, boutons de programmes.",
+        "de": "Service- und Alarmmeldungen, nicht erreichbare Geräte, schwache Batterien, Programmtasten.",
+        "es": "Mensajes de servicio y alarma, dispositivos sin conexión, baterías bajas, botones de programas."
       },
       "icon": "activity",
-      "action_timeout_seconds": 15
+      "settings": [
+        {
+          "key": "programs",
+          "type": "string",
+          "label": {
+            "en": "Program buttons",
+            "fr": "Boutons de programmes",
+            "de": "Programmtasten",
+            "es": "Botones de programas"
+          },
+          "description": {
+            "en": "Up to four CCU program names, separated by commas.",
+            "fr": "Jusqu'à quatre noms de programmes de la CCU, séparés par des virgules.",
+            "de": "Bis zu vier Namen von CCU-Programmen, durch Kommas getrennt.",
+            "es": "Hasta cuatro nombres de programas de la CCU, separados por comas."
+          },
+          "placeholder": {
+            "en": "e.g. Leaving, Night",
+            "fr": "ex. Départ, Nuit",
+            "de": "z. B. Abwesend, Nacht",
+            "es": "p. ej. Salida, Noche"
+          }
+        }
+      ],
+      "action_timeout_seconds": 30
     }
   ]
 }

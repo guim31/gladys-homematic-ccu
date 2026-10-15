@@ -31,16 +31,25 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
+index.js                          SDK wiring only (src/app.js), handlers registered before connect()
+src/app.js                        registerHandlers(gladys): every SDK handler, shared by the tests
+src/hub.js                        the CCU: discovery, reading timer, states, button events, commands
+src/ccu/client.js                 JSON-RPC client of the CCU WebUI API (/api/homematic.cgi), sessions
+src/ccu/scripts.js                HomeMatic scripts (ReGa.runScript) and the parsing of their output
+src/ccu/http.js                   the one network function (node:http/https, self-signed accepted)
+src/homematic/profiles.js         channel type → Gladys features, values and commands
+src/homematic/models.js           model tables of aiohomematic (HmIP outputs), security/CCU models
+src/devices.js                    Gladys devices (one per Homematic device + the CCU device)
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/widgets.js                    dashboard widget (manifest `widgets`)
+src/texts.js                      every text sent to Gladys, in en/fr/de/es
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
+scripts/probe.mjs                 read-only probe of a real CCU (maintainers)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (same sections)
+test/                             node --test, against the SDK's fake Gladys and a fake CCU
+test/helpers/fakeCcu.js           in-memory CCU: JSON API, sessions, scripts, device reactions
+test/fixtures/ccu/                real CCU data from the aiohomematic recordings (see its README)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +79,9 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in English, French, German and Spanish: action
+  messages, feature names, widget texts, manifest texts, and `docs/en.md`,
+  `docs/fr.md`, `docs/de.md`, `docs/es.md`, kept in sync (`test/i18n.test.js`).
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -233,3 +243,56 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+---
+
+# Homematic CCU : ce qu'il faut savoir
+
+Faits vérifiés dans le code de la WebUI eQ-3 (OCCU, `WebUI/www/api`), dans aiohomematic et ses
+enregistrements de vraies CCU. **Développée sans CCU** : rien de ceci n'a encore tourné face à une
+vraie CCU ; `scripts/probe.mjs` est le premier test à faire sur le terrain.
+
+## API
+
+- **Une seule porte : l'API JSON de la WebUI** (`POST /api/homematic.cgi`, JSON-RPC 1.1), sur le port
+  web (80/443), joignable sur toutes les CCU3, RaspberryMatic et piVCCU. Pas de XML-RPC (ports
+  2001/2010/2000) : souvent fermés par le pare-feu de la CCU, et leur rappel (`init`) exige un port
+  entrant que le bac à sable de Gladys n'ouvre pas.
+- **Session** : `Session.login` donne un id, ou l'erreur **501** « invalid credentials or too many
+  sessions ». La session expire au bout de 30 min sans `Session.renew` (les autres appels ne la
+  prolongent pas) ; une session expirée répond **400** « access denied » : se reconnecter une fois.
+  Fermer la session (`Session.logout`) à l'arrêt, sinon la CCU accumule les sessions.
+- **Droits** : `ReGa.runScript` et `CCU.getVersion` exigent un **ADMIN** (400 sinon) ;
+  `Interface.setValue` et `Device.listAllDetail` un GUEST ; `SysVar.*` et `Program.*` un USER. Avec
+  l'authentification désactivée, `Admin` sans mot de passe est administrateur.
+- **Paramètres** : tous envoyés en chaînes, comme aiohomematic. `Interface.setValue` prend le type
+  XML-RPC de la valeur : `bool` (valeur `1`/`0`), `int`, `double`, `string`.
+- **Lecture** : un script ReGa par intervalle (`READ_SCRIPT`) lit valeurs **et horodatages** des seuls
+  points de données des appareils ajoutés, dans le cache de la couche logique : pas de trafic radio,
+  pas de duty cycle. L'horodatage (`Timestamp()`) change à chaque appui même si la valeur reste
+  `true` : c'est ce qui détecte un appui de bouton. Un point de données jamais reçu n'existe pas
+  pour ReGa (pas d'horodatage) : sur un appareil déjà lu, sa première apparition est un appui.
+- **Découverte** : `Device.listAllDetail` (types de canaux) + `fetch_all_device_data.fn`
+  d'aiohomematic (une exécution par interface) pour savoir quelles valeurs existent.
+- Sortie des scripts : noms et chaînes en `UriEncode()` (octets en UTF-8 sur les firmwares 3.x, en
+  ISO-8859-1 avant), flottants écrits avec six décimales.
+
+## Pièges
+
+- **Homematic IP : lire sur le canal TRANSMITTER, écrire sur le premier VIRTUAL_RECEIVER qui suit.**
+  Les deux autres récepteurs virtuels sont des canaux logiques. Les tables d'aiohomematic
+  (`models.js`) donnent les canaux ; la règle générique donne les mêmes (test).
+- **Thermostat HmIP** : mode lu dans `SET_POINT_MODE`, écrit dans `CONTROL_MODE` (0 auto, 1 manuel) ;
+  4,5 °C vaut « arrêt ». **BidCoS** : mode lu dans `CONTROL_MODE`, écrit par les actions `AUTO_MODE`
+  et `MANU_MODE` (consigne).
+- Gladys n'a **aucun type pour un pourcentage d'ouverture de vanne** : `thermostat/operating-state`
+  (chauffe ou non).
+- **Contact d'ouverture** : Homematic 1/true = ouvert, Gladys 0 = ouvert. Poignée : 0 fermée,
+  1 oscillo-battante, 2 ouverte.
+- **Détecteur de fumée HmIP** : `SMOKE_DETECTOR_ALARM_STATUS` 1 = ce détecteur voit la fumée, 3 =
+  alarme d'un autre détecteur du groupe : seul 1 vaut « fumée ».
+- **HmIP-ESI** : la puissance est négative en injection : bornes symétriques.
+- **LEVEL HmIP 1.005 / 1.01** = « inconnu / ancien niveau », pas une position.
+- **Sécurité** : serrures, gâches, portes de garage, motorisations de fenêtre et sirènes jamais
+  pilotables (`SECURITY_MODELS`) ; le relais d'un thermostat mural suit la régulation, pas de switch.
+- Les **ids ReGa 40 et 41** sont les compteurs de messages d'alarme et de service de la CCU.

@@ -1,67 +1,176 @@
-# Template de démonstration
+# Homematic CCU
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
+Fait entrer dans Gladys les appareils Homematic et Homematic IP de votre **CCU3**, **RaspberryMatic**
+ou **piVCCU**, en local : thermostats et têtes de radiateur, contacts de fenêtre, détecteurs de
+mouvement, de fumée et d'eau, interrupteurs et prises avec mesure, volets, variateurs, capteurs
+météo, les boutons de vos télécommandes, les variables système et les programmes de la CCU.
 
-## Ce que vous obtenez
+> **Développée sans le matériel : vos retours sont bienvenus.** L'intégration a été écrite
+> d'après la documentation de la CCU, le code de son interface web et des enregistrements réels
+> de CCU publiés par le projet aiohomematic, mais n'a jamais tourné face à une vraie CCU. Dites-nous
+> ce qui marche et ce qui ne marche pas :
+> [github.com/guim31/gladys-homematic-ccu/issues](https://github.com/guim31/gladys-homematic-ccu/issues).
 
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+Sans lien avec eQ-3. Homematic et Homematic IP sont des marques d'eQ-3 AG.
+
+## Prérequis
+
+- Une CCU3, une RaspberryMatic ou une piVCCU, joignable depuis Gladys sur son port web (80, ou 443
+  en HTTPS). Les appareils sont appairés à la CCU, comme d'habitude : Gladys ne la remplace pas.
+- Un utilisateur de la CCU avec les droits **administrateur** : l'intégration lit les valeurs par
+  un court script HomeMatic, que la CCU n'exécute que pour un administrateur. Si l'authentification
+  est désactivée sur votre CCU (le réglage par défaut), gardez l'utilisateur `Admin` et laissez le
+  mot de passe vide.
+- Gladys 5.1 ou plus récent.
 
 ## Configuration
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
+Dans Gladys, **Intégrations → Homematic CCU → Configuration** :
 
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
+- **Adresse de la CCU** : son adresse IP ou son nom, ex. `192.168.1.50`. Écrivez
+  `https://192.168.1.50` si la CCU redirige son interface web vers le HTTPS.
+- **Utilisateur** et **Mot de passe** : un administrateur de la CCU (`Admin` et un mot de passe
+  vide quand l'authentification est désactivée).
+- **Accepter un certificat auto-signé** : activé par défaut, la CCU signe elle-même son certificat
+  HTTPS.
+- **Interfaces lues** : Homematic IP (radio), Homematic (radio), Homematic filaire, Groupes de
+  chauffage (Homematic IP). Décochez une famille pour la tenir hors de Gladys.
+- **Variables système** : les visibles s'affichent sur l'appareil Homematic CCU, ou aucune.
+- **Intervalle de lecture** : 30 s par défaut, de 10 s à 5 min.
+- **Langue des noms** : la langue des noms de fonctionnalités donnés à l'ajout d'un appareil.
 
-## Actions
+Ouvrez ensuite l'onglet **Découverte** et ajoutez les appareils voulus. **Tester la connexion** lit
+la CCU et dit ce qu'elle a trouvé : son firmware, le nombre d'appareils pour Gladys, de programmes
+et de variables système.
 
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
+**Comment la CCU est lue.** La CCU annonce ses changements en rappelant un serveur que
+l'intégration ouvrirait ; le bac à sable de Gladys ne donne aux intégrations aucun port entrant,
+l'intégration lit donc la CCU : à chaque intervalle, **un** court script demande à la CCU les
+valeurs qu'elle connaît déjà, celles des appareils ajoutés à Gladys. Rien ne passe par la radio,
+le duty cycle n'est pas consommé, et la charge de la CCU reste la même quel que soit le nombre
+d'appareils. Une commande est relue trois secondes après son envoi.
 
-## Scènes
+## Appareils
 
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
+Un appareil Gladys par appareil Homematic, avec le nom qu'il a dans la CCU. Un appareil à
+plusieurs sorties a des fonctionnalités numérotées (Interrupteur 1, Interrupteur 2…). Tout appareil
+à piles a **Batterie faible**. Un appareil que la CCU signale injoignable affiche le badge
+« injoignable ».
 
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
+### Thermostats et têtes de radiateur
 
-## Tableau de bord
+Têtes de radiateur et thermostats muraux Homematic IP (HmIP-eTRV, HmIP-WTH, HmIP-BWTH,
+HmIP-STH…), groupes de chauffage, Homematic HM-CC-RT-DN et HM-TC-IT-WM-W-EU :
 
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+- **Température**, **Humidité** (si le thermostat la mesure) ;
+- **Consigne**, de 4,5 °C (arrêt) à 30,5 °C, par demi-degré ;
+- **Mode de chauffage** : automatique (le programme hebdomadaire de la CCU), chauffage (consigne
+  manuelle) ou arrêt (4,5 °C). Passer d'« arrêt » à « chauffage » règle 20 °C ;
+- **Chauffe** : la vanne est-elle ouverte (Gladys n'a pas de type de fonctionnalité pour un
+  pourcentage d'ouverture de vanne) ;
+- **Fenêtre (thermostat)** : la fenêtre ouverte détectée par le thermostat.
+
+Le relais d'un thermostat mural qui commande un plancher chauffant n'est pas un interrupteur dans
+Gladys : il suit la régulation de la CCU.
+
+### Contacts de fenêtre et de porte
+
+**Ouverture** pour les contacts (HmIP-SWDO, HmIP-SCI, HM-Sec-SC…), **Poignée de fenêtre** pour les
+poignées (HmIP-SRH, HM-Sec-RHS) : une poignée en position oscillo-battante compte comme ouverte.
+
+### Détecteurs de mouvement, de présence, de fumée et d'eau
+
+**Mouvement** et **Éclairement** (HmIP-SMI, HM-Sec-MDIR…), **Présence** (HmIP-SPI), **Fumée**
+(seulement le détecteur qui voit la fumée : les autres du groupe, qui ne font que sonner, restent
+à 0), **Fuite d'eau** (HmIP-SWD, HM-Sec-WDS).
+
+### Interrupteurs, prises et compteurs d'énergie
+
+**Interrupteur** pour chaque sortie (HmIP-PS, HmIP-PSM, HmIP-BSM, HmIP-FSM, HmIP-DRSI4,
+HM-LC-Sw…), avec **Puissance**, **Énergie** (kWh), **Tension** et **Courant** quand l'appareil les
+mesure. Une interface de compteur (HmIP-ESI) donne sa puissance (négative quand vous injectez) et
+ses index.
+
+### Volets, stores et variateurs
+
+**Position** (0 % fermé, 100 % ouvert) et **Volet** (ouvrir, fermer, arrêter) pour les
+actionneurs de volets et de stores (HmIP-BROLL, HmIP-FBL, HM-LC-Bl1…). **Lumière** et **Intensité lumineuse** pour les variateurs (HmIP-BDT, HM-LC-Dim…).
+
+### Capteurs météo et climat
+
+**Température**, **Humidité**, **Éclairement**, **Vitesse du vent**, **Pression atmosphérique** et
+**Pluie**, selon ce que le capteur mesure (HmIP-SWO, HmIP-STHO, HmIP-SRD, HM-WDS…).
+
+### L'appareil Homematic CCU
+
+**Messages de service** et **Messages d'alarme** : les compteurs de la CCU. Puis une fonctionnalité
+par variable système visible, en lecture seule : variables logiques et alarmes en marche/arrêt,
+les autres en texte (une liste affiche le nom de sa valeur, un nombre son unité).
+
+Serrures, gâches, portes de garage, motorisations de fenêtre et sirènes ne sont jamais pilotables
+depuis Gladys : une erreur ouvrirait la maison ou ferait taire une alarme. Leurs piles et leurs
+boutons restent lisibles.
+
+## Déclencheur de scène : Bouton Homematic appuyé
+
+**Bouton Homematic appuyé** lance une scène quand une touche de télécommande, d'interrupteur mural
+ou une entrée est actionnée (HmIP-WRC2/6, HmIP-BRC2, HmIP-KRCA, HmIP-DSD-PCB, HM-PB-2-WM55…).
+Filtres : l'appareil, le **numéro de la touche** (le canal de la touche dans la CCU, 1 pour la
+première), appui **court** ou **long**. La scène peut utiliser le nom de l'appareil, le numéro de
+la touche et l'appui.
+
+Ajoutez d'abord la télécommande dans Gladys (son appareil affiche sa pile). L'appui est vu à la
+lecture suivante de la CCU : avec un intervalle de 10 s, en moins de 10 s. Deux appuis sur la même
+touche entre deux lectures comptent pour un.
+
+## Action de scène : Lancer un programme de la CCU
+
+**Lancer un programme de la CCU** démarre un programme de la CCU par son nom, tel qu'écrit dans la
+CCU (Programmes et connexions), sans tenir compte des majuscules. Le nom accepte les variables de
+scène. Un programme désactivé n'est pas lancé.
+
+## Widget : Homematic CCU
+
+Le widget **Homematic CCU** affiche les messages de service et d'alarme de la CCU, les appareils
+injoignables et les piles faibles parmi les appareils ajoutés à Gladys, et jusqu'à quatre boutons
+qui lancent des programmes de la CCU : saisissez leurs noms, séparés par des virgules, dans les
+réglages du widget. Chaque bouton demande une confirmation.
+
+## Exemples de scènes
+
+- **Sonnette** : déclencheur **Bouton Homematic appuyé** sur la HmIP-DSD-PCB, touche 1 → envoyer
+  un message avec une image de caméra.
+- **Départ de la maison** : appui long sur la touche 4 du porte-clés → éteindre les lumières, puis
+  **Lancer un programme de la CCU** « Départ » pour baisser le chauffage.
+- **Fenêtre ouverte** : une **Ouverture** de fenêtre à 0 (ouverte) pendant 5 minutes → envoyer un
+  message « fermez la fenêtre, le chauffage tourne ».
 
 ## Dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+- **La CCU ne répond pas** : vérifiez l'adresse, que Gladys joint la CCU (même réseau, pas de
+  pare-feu entre les deux) et que l'interface web s'ouvre dans un navigateur.
+- **La CCU redirige vers le HTTPS** : l'option « redirection automatique vers HTTPS » de la CCU est
+  active : écrivez l'adresse avec `https://`.
+- **Utilisateur ou mot de passe refusé** : vérifiez-les dans la CCU (Réglages → Gestion des
+  utilisateurs). La CCU refuse aussi une connexion quand trop de sessions sont ouvertes : elles
+  expirent au bout de 30 minutes.
+- **L'utilisateur de la CCU doit être administrateur** : donnez-lui le rôle administrateur, ou
+  utilisez `Admin`.
+- **Un appareil manque** : il doit être terminé dans la boîte de réception de la CCU, et son
+  interface cochée. Relancez la recherche dans l'onglet Découverte après l'ajout d'un appareil à la
+  CCU.
+- **Une fonctionnalité de capteur manque** : elle apparaît dès que la CCU a reçu une valeur pour
+  elle ; relancez la recherche plus tard.
+- Journaux : dans Gladys, **Paramètres → Système → Intégrations**. Mettez `LOG_LEVEL=debug` pour
+  voir chaque lecture.
+
+## Limites
+
+- Développée sans le matériel : vos retours sont bienvenus.
+- Pas de temps réel : les valeurs suivent l'intervalle de lecture (10 s au mieux), un appui de
+  bouton aussi.
+- Pas de configuration des appareils (programmes hebdomadaires, paramètres), pas d'appairage :
+  utilisez la CCU.
+- Les variables système sont en lecture seule ; les programmes se lancent mais ne se modifient pas.
+- CUxD, CCU-Jack et les autres interfaces d'extensions ne sont pas lues.
+- Une seule CCU par installation de l'intégration.

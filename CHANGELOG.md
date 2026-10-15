@@ -12,44 +12,21 @@ the notes of the version's GitHub Release.
 
 ### Added
 
-- A working example of scene triggers, scene actions and dashboard widgets
-  (Gladys 5.1.0 or later).
-- `CHANGELOG.md`, rolled by the Release workflow.
-- A GitHub Release for every version, with its changelog section as notes: the
-  Gladys Supervision page links each version to the repository's releases.
-- CI runs the tests on Node 22 and 24, and builds the Docker image.
-- Dependabot keeps the npm dependencies and the GitHub Actions up to date.
-- `SECURITY.md` (how to report a vulnerability) and `CLAUDE.md` (project rules
-  for contributors and coding assistants).
-- Manifest tests: `version` matches `package.json`, `docker_image` is tagged
-  with it, descriptions hold 10 to 100 characters, placeholders are
-  multi-language objects.
-- The latitude and longitude fields show an example value as placeholder.
+- The Homematic and Homematic IP devices of a CCU3, RaspberryMatic or piVCCU in Gladys, in local,
+  through the JSON API of the CCU web interface: thermostats and radiator valves (temperature,
+  humidity, target temperature, heating mode, heating, open window), window and door contacts and
+  handles, motion, presence, smoke and water detectors, switches and plugs with power, energy,
+  voltage and current, energy meter interfaces, shutters, blinds and dimmers, weather and climate
+  sensors, low battery, and the "unreachable" badge.
+- The Homematic CCU device: the service and alarm message counters and the visible system
+  variables of the CCU, read-only.
+- Scene trigger "Homematic button pressed" (remotes, wall switches, inputs; short or long press)
+  and scene action "Run a CCU program".
+- Dashboard widget "Homematic CCU": service and alarm messages, devices out of reach, low
+  batteries, and up to four buttons that run CCU programs.
+- The CCU is read by the integration itself, one short script per interval (10 s to 5 min), with
+  no radio traffic; only the changes are sent to Gladys.
+- Locks, door openers, garage doors, window drives and sirens are never controllable.
+- Feature names, messages and documentation in English, French, German and Spanish.
 
-### Changed
-
-- Node.js 22 or later is required (Node 20 is end-of-life).
-- Integration SDK 0.15.0. The tests now run against the fake Gladys of the
-  SDK, which refuses the payloads Gladys refuses.
-- The refresh interval is one minute minimum, the fastest Gladys polls a
-  device. The plug's power is only sent when it changes, and every 30
-  minutes otherwise.
-
-### Fixed
-
-- Gladys refused the devices of the Discovery tab: the weather station and
-  the plug declared their poll frequency in seconds instead of one of the
-  values Gladys accepts, and were never polled. They now poll every minute,
-  and the readings follow the refresh interval of the configuration.
-
-- The release commit no longer fails `npm run format:check`: the Release
-  workflow updates the manifest `version` and `docker_image` in place instead
-  of re-printing the whole file with `jq`.
-- The integration can write to `/data`: the image creates the directory owned
-  by the `node` user, a new Docker volume was owned by root.
-- A sub-container running the integration's own image follows it to the new
-  tag at each release, as well as in the manifest of the build summary: it kept
-  the previous tag, which may not exist on the registry. Sub-containers on a
-  third-party image (a broker, a database...) keep theirs.
-
-[Unreleased]: https://github.com/GladysAssistant/integration-template-js/commits/main
+[Unreleased]: https://github.com/guim31/gladys-homematic-ccu/commits/main

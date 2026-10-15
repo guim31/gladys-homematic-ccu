@@ -1,0 +1,142 @@
+[
+  {
+    "id": "30674",
+    "name": "AS0:Sensoren_Glasbruch",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 15:32:49"
+  },
+  {
+    "id": "16484",
+    "name": "AS0:Sensoren_Hülle_EG",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 15:54:01"
+  },
+  {
+    "id": "16496",
+    "name": "AS0:Sensoren_Hülle_OG",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 15:53:06"
+  },
+  {
+    "id": "16458",
+    "name": "AS0:Sensoren_Innen_EG",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 15:56:50"
+  },
+  {
+    "id": "16472",
+    "name": "AS0:Sensoren_Innen_OG",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 15:56:27"
+  },
+  {
+    "id": "22344",
+    "name": "AS1:Hüllschutz",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 14:43:07"
+  },
+  {
+    "id": "22397",
+    "name": "AS1:Vollschutz",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 15:56:50"
+  },
+  {
+    "id": "19343",
+    "name": "AS2:Schlüssel_Steuerung",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "1970-01-01 01:00:00"
+  },
+  {
+    "id": "20854",
+    "name": "AS3:Alarm_Aktivierung",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-17 21:00:38"
+  },
+  {
+    "id": "19963",
+    "name": "AS4:Alarm_Auslösung",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "1970-01-01 01:00:00"
+  },
+  {
+    "id": "28810",
+    "name": "AS5:Alarm_Sirene_Status",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "1970-01-01 01:00:00"
+  },
+  {
+    "id": "20076",
+    "name": "AS5:Alarm_Sirene_Steuerung",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-17 21:00:38"
+  },
+  {
+    "id": "24808",
+    "name": "AS7:1:Bewegungsmelder_zurücksetzen",
+    "isActive": true,
+    "isInternal": false,
+    "lastExecuteTime": "1970-01-01 01:00:00"
+  },
+  {
+    "id": "25656",
+    "name": "AS7:2:Bewegungsmelder_Innen_aktivieren",
+    "isActive": true,
+    "isInternal": false,
+    "lastExecuteTime": "1970-01-01 01:00:00"
+  },
+  {
+    "id": "26479",
+    "name": "AS7:2:Bewegungsmelder_Innen_deaktivieren",
+    "isActive": true,
+    "isInternal": false,
+    "lastExecuteTime": "1970-01-01 01:00:00"
+  },
+  {
+    "id": "24253",
+    "name": "AS8:Rauchmelder_Steuerung",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 15:07:24"
+  },
+  {
+    "id": "24269",
+    "name": "AS9:Wasssersensor_Steuerung",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 15:30:47"
+  },
+  {
+    "id": "23871",
+    "name": "AST:Alarm_Status_Licht",
+    "isActive": false,
+    "isInternal": true,
+    "lastExecuteTime": "1970-01-01 01:00:00"
+  },
+  {
+    "id": "19946",
+    "name": "AST:Fenster offen",
+    "isActive": true,
+    "isInternal": true,
+    "lastExecuteTime": "2025-10-19 14:43:07"
+  },
+  {
+    "id": "51386",
+    "name": "Bewässerung NE ausschalten",
+    "isActive": true,
+    "isInternal": false,
+    "lastExecuteTime": "1970-01-01 01:00:00"
+  }
+]

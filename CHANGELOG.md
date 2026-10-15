@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-15
+
 ### Added
 
 - The Homematic and Homematic IP devices of a CCU3, RaspberryMatic or piVCCU in Gladys, in local,
@@ -29,4 +31,5 @@ the notes of the version's GitHub Release.
 - Locks, door openers, garage doors, window drives and sirens are never controllable.
 - Feature names, messages and documentation in English, French, German and Spanish.
 
-[Unreleased]: https://github.com/guim31/gladys-homematic-ccu/commits/main
+[Unreleased]: https://github.com/guim31/gladys-homematic-ccu/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/guim31/gladys-homematic-ccu/releases/tag/v1.0.1

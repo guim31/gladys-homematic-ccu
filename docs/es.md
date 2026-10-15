@@ -1,0 +1,175 @@
+# Homematic CCU
+
+Incorpora a Gladys, en local, los dispositivos Homematic y Homematic IP de su **CCU3**,
+**RaspberryMatic** o **piVCCU**: termostatos y cabezales de radiador, contactos de ventana,
+detectores de movimiento, humo y agua, interruptores y enchufes con medición, persianas,
+reguladores, sensores meteorológicos, los botones de sus mandos, las variables del sistema y los
+programas de la CCU.
+
+> **Desarrollada sin el hardware: sus comentarios son bienvenidos.** La integración se escribió a
+> partir de la documentación de la CCU, del código de su interfaz web y de grabaciones reales de
+> CCU publicadas por el proyecto aiohomematic, pero nunca se ha ejecutado frente a una CCU real.
+> Cuéntenos qué funciona y qué no:
+> [github.com/guim31/gladys-homematic-ccu/issues](https://github.com/guim31/gladys-homematic-ccu/issues).
+
+Sin relación con eQ-3. Homematic y Homematic IP son marcas de eQ-3 AG.
+
+## Requisitos
+
+- Una CCU3, una RaspberryMatic o una piVCCU, accesible desde Gladys en su puerto web (80, o 443 en
+  HTTPS). Los dispositivos se emparejan con la CCU, como siempre: Gladys no la sustituye.
+- Un usuario de la CCU con derechos de **administrador**: la integración lee los valores con un
+  breve script HomeMatic, que la CCU solo ejecuta para un administrador. Si la autenticación está
+  desactivada en su CCU (el ajuste por defecto), deje el usuario `Admin` y la contraseña vacía.
+- Gladys 5.1 o posterior.
+
+## Configuración
+
+En Gladys, **Integraciones → Homematic CCU → Configuración**:
+
+- **Dirección de la CCU**: su dirección IP o su nombre, p. ej. `192.168.1.50`. Escriba
+  `https://192.168.1.50` si la CCU redirige su interfaz web a HTTPS.
+- **Usuario** y **Contraseña**: un administrador de la CCU (`Admin` y una contraseña vacía cuando
+  la autenticación está desactivada).
+- **Aceptar un certificado autofirmado**: activado por defecto, la CCU firma su propio certificado
+  HTTPS.
+- **Interfaces leídas**: Homematic IP (radio), Homematic (radio), Homematic por cable, Grupos de
+  calefacción (Homematic IP). Desmarque una familia para dejarla fuera de Gladys.
+- **Variables del sistema**: las visibles se muestran en el dispositivo Homematic CCU, o ninguna.
+- **Intervalo de lectura**: 30 s por defecto, de 10 s a 5 min.
+- **Idioma de los nombres**: el idioma de los nombres de funciones asignados al añadir un
+  dispositivo.
+
+Abra después la pestaña **Descubrimiento** y añada los dispositivos que desee. **Probar la
+conexión** lee la CCU e indica lo que ha encontrado: su firmware, el número de dispositivos para
+Gladys, de programas y de variables del sistema.
+
+**Cómo se lee la CCU.** La CCU anuncia sus cambios llamando a un servidor que la integración
+abriría; el entorno aislado de Gladys no da a las integraciones ningún puerto de entrada, así que
+la integración lee la CCU: en cada intervalo, **un** breve script pide a la CCU los valores que ya
+conoce, los de los dispositivos añadidos a Gladys. Nada pasa por radio, el duty cycle no se
+consume y la carga de la CCU es la misma sea cual sea el número de dispositivos. Una orden se
+vuelve a leer tres segundos después de enviarse.
+
+## Dispositivos
+
+Un dispositivo Gladys por dispositivo Homematic, con el nombre que tiene en la CCU. Un dispositivo
+con varias salidas tiene funciones numeradas (Interruptor 1, Interruptor 2…). Todo dispositivo con
+pilas tiene **Batería baja**. Un dispositivo que la CCU indica como inaccesible muestra la
+insignia «inaccesible».
+
+### Termostatos y cabezales de radiador
+
+Cabezales de radiador y termostatos de pared Homematic IP (HmIP-eTRV, HmIP-WTH, HmIP-BWTH,
+HmIP-STH…), grupos de calefacción, Homematic HM-CC-RT-DN y HM-TC-IT-WM-W-EU:
+
+- **Temperatura**, **Humedad** (si el termostato la mide);
+- **Temperatura objetivo**, de 4,5 °C (apagado) a 30,5 °C, por medios grados;
+- **Modo de calefacción**: automático (el programa semanal de la CCU), calefacción (consigna
+  manual) o apagado (4,5 °C). Pasar de «apagado» a «calefacción» fija 20 °C;
+- **Calefacción activa**: si la válvula está abierta (Gladys no tiene un tipo de función para un
+  porcentaje de apertura de válvula);
+- **Ventana (termostato)**: la ventana abierta detectada por el termostato.
+
+El relé de un termostato de pared que controla una calefacción por suelo no es un interruptor en
+Gladys: sigue la regulación de la CCU.
+
+### Contactos de ventana y de puerta
+
+**Apertura** para los contactos (HmIP-SWDO, HmIP-SCI, HM-Sec-SC…), **Manilla de ventana** para las
+manillas (HmIP-SRH, HM-Sec-RHS): una manilla en posición oscilobatiente cuenta como abierta.
+
+### Detectores de movimiento, presencia, humo y agua
+
+**Movimiento** e **Iluminancia** (HmIP-SMI, HM-Sec-MDIR…), **Presencia** (HmIP-SPI), **Humo**
+(solo el detector que ve el humo: los demás del grupo, que solo suenan, se quedan en 0), **Fuga de
+agua** (HmIP-SWD, HM-Sec-WDS).
+
+### Interruptores, enchufes y contadores de energía
+
+**Interruptor** para cada salida (HmIP-PS, HmIP-PSM, HmIP-BSM, HmIP-FSM, HmIP-DRSI4, HM-LC-Sw…),
+con **Potencia**, **Energía** (kWh), **Tensión** y **Corriente** cuando el dispositivo las mide.
+Una interfaz de contador (HmIP-ESI) da su potencia (negativa cuando usted inyecta) y sus índices.
+
+### Persianas, estores y reguladores
+
+**Posición** (0 % cerrada, 100 % abierta) y **Persiana** (abrir, cerrar, detener) para los
+actuadores de persianas y estores (HmIP-BROLL, HmIP-FBL, HM-LC-Bl1…). **Luz** y **Brillo** para
+los reguladores (HmIP-BDT, HM-LC-Dim…).
+
+### Sensores meteorológicos y de clima
+
+**Temperatura**, **Humedad**, **Iluminancia**, **Velocidad del viento**, **Presión atmosférica** y
+**Lluvia**, según lo que mida el sensor (HmIP-SWO, HmIP-STHO, HmIP-SRD, HM-WDS…).
+
+### El dispositivo Homematic CCU
+
+**Mensajes de servicio** y **Mensajes de alarma**: los contadores de la CCU. Después, una función
+por variable del sistema visible, de solo lectura: variables lógicas y alarmas como encendido /
+apagado, las demás como texto (una lista muestra el nombre de su valor, un número su unidad).
+
+Cerraduras, abrepuertas, puertas de garaje, motores de ventana y sirenas nunca se pueden controlar
+desde Gladys: un error abriría la casa o silenciaría una alarma. Sus pilas y sus botones siguen
+siendo legibles.
+
+## Disparador de escena: Botón Homematic pulsado
+
+**Botón Homematic pulsado** inicia una escena cuando se pulsa una tecla de un mando, de un pulsador
+de pared o una entrada (HmIP-WRC2/6, HmIP-BRC2, HmIP-KRCA, HmIP-DSD-PCB, HM-PB-2-WM55…). Filtros:
+el dispositivo, el **número de la tecla** (el canal de la tecla en la CCU, 1 para la primera),
+pulsación **corta** o **larga**. La escena puede usar el nombre del dispositivo, el número de la
+tecla y la pulsación.
+
+Añada primero el mando a Gladys (su dispositivo muestra su pila). La pulsación se detecta en la
+siguiente lectura de la CCU: con un intervalo de 10 s, en menos de 10 s. Dos pulsaciones de la
+misma tecla entre dos lecturas cuentan como una.
+
+## Acción de escena: Ejecutar un programa de la CCU
+
+**Ejecutar un programa de la CCU** inicia un programa de la CCU por su nombre, tal y como aparece
+en la CCU (Programas y conexiones), sin distinguir mayúsculas. El nombre acepta variables de
+escena. Un programa desactivado no se ejecuta.
+
+## Widget: Homematic CCU
+
+El widget **Homematic CCU** muestra los mensajes de servicio y de alarma de la CCU, los
+dispositivos inaccesibles y las baterías bajas entre los dispositivos añadidos a Gladys, y hasta
+cuatro botones que ejecutan programas de la CCU: escriba sus nombres, separados por comas, en los
+ajustes del widget. Cada botón pide una confirmación.
+
+## Ejemplos de escenas
+
+- **Timbre**: disparador **Botón Homematic pulsado** en la HmIP-DSD-PCB, tecla 1 → enviar un
+  mensaje con una imagen de cámara.
+- **Salir de casa**: pulsación larga en la tecla 4 del llavero → apagar las luces y después
+  **Ejecutar un programa de la CCU** «Salida» para bajar la calefacción.
+- **Ventana abierta**: una **Apertura** de ventana en 0 (abierta) durante 5 minutos → enviar un
+  mensaje «cierre la ventana, la calefacción está encendida».
+
+## Solución de problemas
+
+- **La CCU no responde**: compruebe la dirección, que Gladys llega a la CCU (misma red, sin
+  cortafuegos entre ambos) y que la interfaz web se abre en un navegador.
+- **La CCU redirige a HTTPS**: la opción «redirección automática a HTTPS» de la CCU está activada:
+  escriba la dirección con `https://`.
+- **Usuario o contraseña rechazados**: compruébelos en la CCU (Ajustes → Gestión de usuarios). La
+  CCU también rechaza un inicio de sesión cuando hay demasiadas sesiones abiertas: caducan a los 30
+  minutos.
+- **El usuario de la CCU debe ser administrador**: asígnele el rol de administrador, o use `Admin`.
+- **Falta un dispositivo**: debe estar terminado en la bandeja de entrada de la CCU, y su interfaz
+  marcada. Vuelva a buscar en la pestaña Descubrimiento después de añadir un dispositivo a la CCU.
+- **Falta una función de un sensor**: aparece en cuanto la CCU ha recibido un valor para ella;
+  vuelva a buscar más tarde.
+- Registros: en Gladys, **Ajustes → Sistema → Integraciones**. Defina `LOG_LEVEL=debug` para ver
+  cada lectura.
+
+## Límites
+
+- Desarrollada sin el hardware: sus comentarios son bienvenidos.
+- Sin tiempo real: los valores siguen el intervalo de lectura (10 s como mínimo), una pulsación de
+  botón también.
+- Sin configuración de los dispositivos (programas semanales, parámetros) ni emparejamiento: use
+  la CCU.
+- Las variables del sistema son de solo lectura; los programas se ejecutan, pero no se editan.
+- CUxD, CCU-Jack y las demás interfaces de complementos no se leen.
+- Una sola CCU por instalación de la integración.

@@ -1,0 +1,17 @@
+[
+  {
+    "name": "BidCos-RF",
+    "port": 32001,
+    "info": "BidCos-RF"
+  },
+  {
+    "name": "VirtualDevices",
+    "port": 39292,
+    "info": "Virtual Devices"
+  },
+  {
+    "name": "HmIP-RF",
+    "port": 32010,
+    "info": "HmIP-RF"
+  }
+]

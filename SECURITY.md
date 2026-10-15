@@ -30,6 +30,23 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+What the integration holds and where:
+
+- **Secrets**: the user and password of the CCU live in the Gladys configuration of the
+  integration (the password is a `secret` field, never shown back). They are sent to the CCU only,
+  at each login, and never written to the logs. The session id of the CCU stays in memory and is
+  closed when the integration stops.
+- **`/data`**: nothing is stored there.
+- **Network**: the integration only talks to the CCU address of the configuration, on its web
+  port (`/api/homematic.cgi`, HTTP or HTTPS; a self-signed certificate is accepted by default, the
+  CCU signs its own). It opens no port and calls no cloud service.
+- **What it can do on the CCU**: read the devices, values, system variables and programs, set the
+  values of the devices added to Gladys, and run the programs named in a scene or a widget. It
+  needs an administrator user because the CCU only runs HomeMatic scripts for an administrator; the
+  scripts it sends are fixed, and the only names they contain are checked against a strict
+  pattern (no script injection). Locks, door openers, garage doors, window drives and sirens are
+  never controllable.
+
 Out of scope: Gladys Assistant itself (see its
-[security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+[security policy](https://github.com/GladysAssistant/Gladys/security/policy)), the CCU and its
+firmware (report to eQ-3 or to the RaspberryMatic project), and the devices paired with it.

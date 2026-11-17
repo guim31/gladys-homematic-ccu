@@ -1,6 +1,6 @@
 {
   "name": "gladys-homematic-ccu",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Gladys Assistant integration for the Homematic CCU3, RaspberryMatic and piVCCU (Homematic and Homematic IP, local).",
   "type": "module",
